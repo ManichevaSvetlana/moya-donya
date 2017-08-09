@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/app.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: AAvanteBs; /* Имя шрифта */
+            src: url(fonts/Avante-BS-Bold.ttf); /* Путь к файлу со шрифтом */
+        }
+
+        @font-face {
+            font-family: AAvanteBsExtrabold; /* Имя шрифта */
+            src: url(fonts/Avante-BS-Extrabold.ttf); /* Путь к файлу со шрифтом */
+        }
+
+        .nav-item {
+            color: rgba(0, 0, 0, .65);
+            font-size: 14px;
+        }
+
+        .color-1 {
+            color: #d3165a;
+
+        }
+
+        body {
+            line-height: 16px;
+            letter-spacing: 1px;
+            background-color: white;
+            font-size: 14px;
+            font-family: AAvanteBs;
+        }
+
+        .nav-search {
+            padding: 10px;
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgba(46, 46, 46, .3);
+            border-radius: 2px;
+            background-color: transparent;
+        }
+
+        .nav-search::placeholder {
+            color: rgba(46, 46, 46, .3);
+        }
+
+        input[type=search] {
+            width: 60%;
+            color: blue;
+            -webkit-transition: width 0.4s ease-in-out;
+            transition: width 0.4s ease-in-out;
+        }
+
+        /* When the input field gets focus, change its width to 100% */
+        input[type=search]:focus {
+            he: 500px;
+            color: #ff8cd2;
+        }
+
+        @media (max-width: 991px) {
+            .nav-search {
+                display: none;
+            }
+        }
+    </style>
+    <script src="https://use.fontawesome.com/7ff68fb8a2.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <table style=" width: 100%; height: 35px; max-height: 1000px" border="0">
+        <tr>
+            <td style="width: 17%; padding: 10px">
+                <img src="images/logo-v2.png" alt="" height="35px">
+            </td>
+            <td style="width: 33%; padding: 10px">
+                <table style=" width: 100%; height: 100%; vertical-align: bottom" border="0">
+                    <tr style="vertical-align: bottom">
+                        <td><a class="nav-item" href="">Главная</a></td>
+                        <td><a class="nav-item color-1" href="">Вход</a></td>
+                        <td><a class="nav-item color-1" href="">Регистрация</a></td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width: 33%; padding: 10px 10px 7px; vertical-align: bottom"><input class="nav-search"
+                                                                                          type="search"
+                                                                                          placeholder='Поиск'
+                                                                                          style=" width: 60%; float: right; height: 60%">
+            </td>
+            <td style="width: 17%; padding: 15px 15px 11px; vertical-align: bottom; font-family: AAvanteBsExtrabold; font-size: 16px"
+                class="color-1">
+                <div style="float: right"><i class="fa fa-shopping-basket" aria-hidden="true"></i>Корзина</div>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

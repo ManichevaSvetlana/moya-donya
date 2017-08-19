@@ -232,4 +232,6 @@
                     document.getElementById('save-update-form').action = '/item/' + id;
                 }
             </script>
+
+
 @endsection

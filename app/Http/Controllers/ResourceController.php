@@ -9,9 +9,9 @@ class ResourceController extends Controller
     /**Display a listing of the resource.*/
     public static function create($model, $number = null, $skip = null)
     {
-        if ($number != null && $skip != null) return $model::skip($skip)->take($number)->get();
-        elseif ($number != null) return $model::take($number)->get();
-        else return $model::all();
+        if ($number != null && $skip != null) return $model::skip($skip)->take($number)->orderBy('created_at')->get();
+        elseif ($number != null) return $model::take($number)->orderBy('created_at')->get();
+        else return $model::orderBy('created_at', 'desc')->get();
     }
 
     /**Store a newly created resource in storage.*/

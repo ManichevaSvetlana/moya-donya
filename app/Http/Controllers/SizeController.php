@@ -10,7 +10,7 @@ class SizeController extends Controller
 {
     public function index()
     {
-        return view('admin-resource.resource', [
+        return view('admin.table-basic', [
             'resource' => 'size'
         ]);
     }

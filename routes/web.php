@@ -18,12 +18,6 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/test', function () {
-    return view('test');
-});
-Route::post('/save-file', 'PhotoController@saveFile')->name('save');
-
-
 
 Route::resource('fluffiness', 'FluffinessController');
 Route::resource('category', 'CategoryController');
@@ -34,3 +28,9 @@ Route::resource('item', 'ItemController');
 
 
 
+Route::get('/admin', function () {
+    return view('admin.index');
+});
+Route::post('/photo/set', 'PhotoController@setPhotos');
+Route::post('/photo/get', 'PhotoController@getPhotos');
+Route::post('/test', 'PhotoController@test');

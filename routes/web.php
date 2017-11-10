@@ -18,6 +18,10 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/test', function () {
+    dd(\App\Http\Controllers\PhotoController::isMainExists());
+});
+
 
 Route::resource('fluffiness', 'FluffinessController');
 Route::resource('category', 'CategoryController');
@@ -25,12 +29,10 @@ Route::resource('brand', 'BrandController');
 Route::resource('colour', 'ColourController');
 Route::resource('size', 'SizeController');
 Route::resource('item', 'ItemController');
+Route::resource('photo', 'PhotoController');
 
 
 
 Route::get('/admin', function () {
     return view('admin.index');
 });
-Route::post('/photo/set', 'PhotoController@setPhotos');
-Route::post('/photo/get', 'PhotoController@getPhotos');
-Route::post('/test', 'PhotoController@test');

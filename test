@@ -1,0 +1,64 @@
+<form class="form-group" enctype="multipart/form-data" method="post"
+      name="send-photos" id="formx">
+    {{ csrf_field() }}
+    <input type="text" id="textHelp" name="textHelp">
+    <label for="select-brand">Загрузите изображения:</label><br>
+    <label class="custom-file">
+        <input type="file" class="custom-file-input" name="photos[]" id="photos"
+               accept="image/jpeg,image/png" multiple>
+        <span class="custom-file-control"></span>
+    </label>
+
+    <button name="sb-btn" class="btn btn-danger" v-on:click.prevent="sendPhoto">Send</button>
+</form>
+
+<script>
+    Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('content');
+
+    new Vue({
+        el: '#app',
+        data: {
+            item: {name: 'Название товара'},
+            sender: {photos: ''}
+        },
+        methods: {
+            sendPhotos: function(e) {
+                console.log('ok');
+                var files = e.target.files;
+                for (var i = 0, f; f = files[i]; i++) {
+                    if (!f.type.match('image.*')) continue;
+                    var fr = new FileReader();
+                    fr.onload = (function (theFile) {
+                        return function (e) {
+                            var li = document.createElement('li');
+                            li.innerHTML = "<img src='" + e.target.result + "' height='100px'/>";
+                            document.getElementById('list').insertBefore(li, null);
+                        };
+                    })(f);
+
+                    fr.readAsDataURL(f);
+                }
+                var form = document.getElementById("send-photos");
+                form.submit();
+            },
+            test: function () {
+                this.$http.post('/photo/get').then(function (response) {
+                    console.log('Gettiong from the server');
+                    console.log(response.body);
+                    console.log('End getting from the server');
+                });
+            },
+            sendPhoto: function() {
+                var msg   = $('#formx');
+                console.log(msg);
+                this.$http.post('/photo/set', msg).then(function (response) {
+                    console.log('Sending to the server');
+                    console.log(response.body);
+                    console.log('End sending to the server');
+                });
+            }
+        }
+    });
+
+
+</script>

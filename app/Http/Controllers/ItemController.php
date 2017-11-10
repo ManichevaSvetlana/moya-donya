@@ -94,7 +94,7 @@ class ItemController extends Controller
         ]);
     }
 
-    protected static function getId()
+    public static function getId()
     {
         return Item::max('id');
     }

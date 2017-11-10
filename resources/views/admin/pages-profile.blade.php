@@ -1,44 +1,53 @@
 @extends('layouts.admin')
+@section('style')
+    <style>
+        .non-visible{
+            display: none;
+        }
+        .img-list{
+            width: 100px;
+        }
+    </style>
+@endsection
 @section('content')
     <div class="row" id="app">
         <!-- Column -->
         <div class="col-lg-4 col-xlg-3 col-md-5">
             <div class="card">
-                <div class="card-block">
-                    <center class="m-t-30"><img src="{{asset('assets/images/users/new-photo.png')}}" class="img-circle"
-                                                width="150"/>
-                        <h4 class="card-title m-t-10"></h4>
-                        <h6 class="card-subtitle">Accoubts Manager Amix corp</h6>
-                        <div class="row text-center justify-content-md-center">
-                            <div class="col-4"><a href="javascript:void(0)" class="link"><i class="icon-people"></i>
-                                    <font class="font-medium">254</font></a></div>
-                            <div class="col-4"><a href="javascript:void(0)" class="link"><i class="icon-picture"></i>
-                                    <font class="font-medium">54</font></a></div>
-                        </div>
+                <form action="{{url('/photo')}}" class="card-block" id="form-main-photo-upload" method="post" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+                    <center class="m-t-30">
+                        <img v-if="isMain" :src="path + mainPhoto" class="img-circle"
+                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img" name="main-img"/>
+                        <img v-if="!isMain" src="{{asset('assets/images/users/new-photo.png')}}" class="img-circle"
+                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img" name="main-img"/>
+                        <input class="non-visible" type="file" name="mainPhoto" id="mainPhoto"
+                               accept=".jpg, .jpeg, .png" v-on:change.prevent="sendMainPhoto">
+                        <h4 class="card-title m-t-10" >@{{ item.name }}</h4>
+                        <h6 class="card-subtitle"></h6>
                     </center>
-                </div>
+                </form>
             </div>
-            <form action="{{url('/photo/set')}}" class="form-group" enctype="multipart/form-data" method="post">
+
+            <form action="{{url('/photo')}}" class="form-group" enctype="multipart/form-data" method="post"
+                  name="send-photos" id="form-photos-upload">
                 {{ csrf_field() }}
                 <label for="select-brand">Загрузите изображения:</label><br>
                 <label class="custom-file">
                     <input type="file" class="custom-file-input" name="photos[]" id="photos"
-                           accept="image/jpeg,image/png" multiple>
-                    <input type="text" id="lol" name="lol">
+                           accept="image/jpeg,image/png" multiple v-on:change.prevent="sendPhoto">
                     <span class="custom-file-control"></span>
                 </label>
+                <table class="table">
+                    <tbody>
+                    <tr v-for="photo in photos" v-if="!photo.is_main">
+                        <td><img :src='path + photo.photo' class="img-list card"></td>
+                        <td><button class="btn btn-danger" v-on:click.prevent="destroyPhoto(photo.id)">Удалить</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
 
-                <button type="submit">Ok</button>
-                <ul id="list"></ul>
-            </form>
-            <!-- Form for sending images without ajax/vue.js
-            <form class="form-group" action="/photo/set" method="post" enctype="multipart/form-data">
-                {{ csrf_field() }}
-                <input type="file" class="custom-file-input" name="photo[]" id="photo"
-                       accept="image/jpeg,image/png" multiple>
-                <input type="submit" class="submit button">Lol
-            </form>
-            -->
         </div>
         <!-- Column -->
         <div class="col-lg-8 col-xlg-9 col-md-7">
@@ -51,7 +60,7 @@
                             <label class="col-md-12">Название товара</label>
                             <div class="col-md-12">
                                 <input type="text" placeholder="Введите название"
-                                       class="form-control form-control-line">
+                                       class="form-control form-control-line" v-model="item.name">
                             </div>
                         </div>
 
@@ -135,64 +144,60 @@
                 </div>
             </div>
         </div>
-        <button v-on:click.prevent="test()"> HEEY</button>
         <!-- Column -->
     </div>
 @endsection
 
 @section('script')
 
+
     <script>
-        function showFile(e) {
-            alert('hmmm');
-            var files = e.target.files;
-            for (var i = 0, f; f = files[i]; i++) {
-                if (!f.type.match('image.*')) continue;
-                var fr = new FileReader();
-                fr.onload = (function (theFile) {
-                    return function (e) {
-                        var li = document.createElement('li');
-                        li.innerHTML = "<img src='" + e.target.result + "' height='100px'/>";
-                        document.getElementById('list').insertBefore(li, null);
-                    };
-                })(f);
-
-                fr.readAsDataURL(f);
-            }
-
-            document.getElementById('lol').value = files;
-            console.log('lol value:');
-            console.log(document.getElementById('lol').value);
-            console.log('------------------------------------');
-        }
-        document.getElementById('photos').addEventListener('change', showFile, false);
-
-
-
-   /*     Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('content');
+        Vue.http.headers.common['X-CSRF-TOKEN'] = document.querySelector('#token').getAttribute('content');
 
         new Vue({
             el: '#app',
             data: {
-                item: {name: 'Название товара'},
-                sender: {photos: ''}
+                path: '<?echo asset('')?>',
+                photos: {},
+                mainPhoto: '',
+                isMain: false,
+                item: {name: ''}
             },
-            methods: {
-                setPhotos: function(){
+            mounted: function () {
+                this.fetchPhotos();
+            },
 
+            methods: {
+                fetchPhotos: function () {
+                    this.$http.get('/photo').then(function (response) {
+                        this.photos = response.body.photos;
+                        n = Object.keys(response.body.mainPhoto);
+                        n = parseInt(n[0]);
+                        if(response.body.mainPhoto[n].photo != null){
+                            this.isMain = true;
+                            this.mainPhoto = response.body.mainPhoto[n].photo;
+                        }
+                    })
                 },
-                test: function () {
-                    this.$http.post('/photo/get').then(function (response) {
-                        console.log('Gettiong from the server');
-                        console.log(response.body);
-                        console.log('End getting from the server');
+                sendPhoto: function() {
+                    $('#form-photos-upload').submit();
+                },
+                destroyPhoto: function (id) {
+                    this.$http.delete('/photo/' + id).then(function (response) {
                     });
+                    this.fetchPhotos();
+                },
+                setMainPhoto: function() {
+                    $('#mainPhoto').click();
+                },
+                sendMainPhoto: function () {
+                    $('#form-main-photo-upload').submit();
                 }
             }
-        }); */
-
-
+        });
     </script>
+
+
 @endsection
 
 

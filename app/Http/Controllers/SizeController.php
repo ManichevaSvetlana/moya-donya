@@ -43,8 +43,7 @@ class SizeController extends Controller
         foreach ($request->sizes as $i => $size) {
             Item::findOrFail($itemId)->size()->attach($size, [
                 'price' => $request->prices[$indexes[$i]],
-                'quantity' => $request->quantity[$indexes[$i]],
-                'description' => $request->descriptions[$indexes[$i]],
+                'quantity' => $request->quantity[$indexes[$i]]
             ]);
         }
     }

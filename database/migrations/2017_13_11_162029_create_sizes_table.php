@@ -27,7 +27,6 @@ class CreateSizesTable extends Migration
             $table->foreign('size_id')->references('id')->on('sizes');
             $table->float('price');
             $table->integer('quantity');
-            $table->text('description');
             $table->timestamps();
         });
     }

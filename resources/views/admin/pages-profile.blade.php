@@ -1,10 +1,11 @@
 @extends('layouts.admin')
 @section('style')
     <style>
-        .non-visible{
+        .non-visible {
             display: none;
         }
-        .img-list{
+
+        .img-list {
             width: 100px;
         }
     </style>
@@ -14,16 +15,19 @@
         <!-- Column -->
         <div class="col-lg-4 col-xlg-3 col-md-5">
             <div class="card">
-                <form action="{{url('/photo')}}" class="card-block" id="form-main-photo-upload" method="post" enctype="multipart/form-data">
+                <form action="{{url('/photo')}}" class="card-block" id="form-main-photo-upload" method="post"
+                      enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <center class="m-t-30">
                         <img v-if="isMain" :src="path + mainPhoto" class="img-circle"
-                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img" name="main-img"/>
+                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img"
+                             name="main-img"/>
                         <img v-if="!isMain" src="{{asset('assets/images/users/new-photo.png')}}" class="img-circle"
-                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img" name="main-img"/>
+                             width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img"
+                             name="main-img"/>
                         <input class="non-visible" type="file" name="mainPhoto" id="mainPhoto"
                                accept=".jpg, .jpeg, .png" v-on:change.prevent="sendMainPhoto">
-                        <h4 class="card-title m-t-10" >@{{ item.name }}</h4>
+                        <h4 class="card-title m-t-10">@{{ item.name }}</h4>
                         <h6 class="card-subtitle"></h6>
                     </center>
                 </form>
@@ -42,7 +46,9 @@
                     <tbody>
                     <tr v-for="photo in photos" v-if="!photo.is_main">
                         <td><img :src='path + photo.photo' class="img-list card"></td>
-                        <td><button class="btn btn-danger" v-on:click.prevent="destroyPhoto(photo.id)">Удалить</button></td>
+                        <td>
+                            <button class="btn btn-danger" v-on:click.prevent="destroyPhoto(photo.id)">Удалить</button>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -60,10 +66,16 @@
                             <label class="col-md-12">Название товара</label>
                             <div class="col-md-12">
                                 <input type="text" placeholder="Введите название"
-                                       class="form-control form-control-line" v-model="item.name">
+                                       class="form-control form-control-line" v-model="item.name" name="name" id="name">
                             </div>
                         </div>
-
+                        <div class="form-group">
+                            <label for="colours" class="col-sm-12">Введите описание товара:</label>
+                            <div class="col-sm-12">
+                                <textarea rows="3" class="form-control form-control-line" id="description"
+                                          name="description" placeholder="..."></textarea>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label for="category" class="col-sm-12">К какой категории относится товар:</label>
                             <div class="col-sm-12">
@@ -127,9 +139,6 @@
                                             <input type="text" class="form-control form-control-line" id="quantity"
                                                    name="quantity[]"
                                                    placeholder="Введите количество">
-                                            <textarea rows="3" class="form-control form-control-line" id="description"
-                                                      name="descriptions[]"
-                                                      placeholder="Введите описание товара"></textarea>
                                         </div>
                                     @endforeach
                                 </div>
@@ -173,13 +182,13 @@
                         this.photos = response.body.photos;
                         n = Object.keys(response.body.mainPhoto);
                         n = parseInt(n[0]);
-                        if(response.body.mainPhoto[n].photo != null){
+                        if (response.body.mainPhoto[n].photo != null) {
                             this.isMain = true;
                             this.mainPhoto = response.body.mainPhoto[n].photo;
                         }
                     })
                 },
-                sendPhoto: function() {
+                sendPhoto: function () {
                     $('#form-photos-upload').submit();
                 },
                 destroyPhoto: function (id) {
@@ -187,7 +196,7 @@
                     });
                     this.fetchPhotos();
                 },
-                setMainPhoto: function() {
+                setMainPhoto: function () {
                     $('#mainPhoto').click();
                 },
                 sendMainPhoto: function () {

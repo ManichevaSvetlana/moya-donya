@@ -7,11 +7,9 @@ use App\Category;
 use App\Colour;
 use App\Fluffiness;
 use App\Item;
-use App\Photo;
 use App\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Psy\Exception\ErrorException;
 
 class ItemController extends Controller
 {
@@ -46,8 +44,7 @@ class ItemController extends Controller
                 'brands' => Brand::all(),
                 'colours' => Colour::all()
             ]);
-        }
-        else return dd('Access denied');
+        } else return dd('Access denied');
     }
 
     public function edit($id)
@@ -76,11 +73,12 @@ class ItemController extends Controller
 
     protected static function save(Request $request)
     {
-        Item::create([
+        Item::insert([
             'category_id' => $request->category,
             'brand_id' => $request->brand,
             'fluffiness_id' => $request->fluffiness,
-            'name' => $request->name,
+            'description' => $request->description,
+            'name' => $request->name
         ]);
     }
 
@@ -116,15 +114,14 @@ class ItemController extends Controller
         $success = false;
         DB::beginTransaction();
         try {
-            if (PhotoController::checkImage($request)) {  // Check is file an image
-                ItemController::save($request); // Create new record in table Items
-                $id = ItemController::getId(); // Get max Id in table Items
-                PhotoController::storeAll($id, $request); // Create new records in table Item_photos
-                ColourController::storePivot($id, $request); // Create new records in table Item_colours
-                $indexes = ItemController::getKeysWithoutNull($request->prices); // Get indexes of prices, where value is exist
-                SizeController::storePivot($id, $request, $indexes); // Create new records in table Item_sizes
-                $success = true;
-            }
+            ItemController::save($request); // Create new record in table Items
+            $id = ItemController::getId(); // Get max Id in table Items
+            PhotoController::storeWithRelative(); // Create new records in table Item_photos
+            ColourController::storePivot($id, $request); // Create new records in table Item_colours
+            $indexes = ItemController::getKeysWithoutNull($request->prices); // Get indexes of prices, where value is exist
+            SizeController::storePivot($id, $request, $indexes); // Create new records in table Item_sizes
+            $success = true;
+
         } catch (\Error $e) {
             dd('Something went wrong');
         }

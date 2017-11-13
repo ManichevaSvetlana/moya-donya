@@ -19,7 +19,14 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/test', function () {
-    dd(\App\Http\Controllers\PhotoController::isMainExists());
+    $id = \App\Http\Controllers\ItemController::getId();
+    $photo = \Illuminate\Support\Facades\DB::table('item_photos');
+    $photo->insert([
+        'item_id' => $id,
+        'photo_id' => 19,
+        'is_main' => '1'
+    ]);
+    dd(\App\Item::findOrFail($id)->photo);
 });
 
 

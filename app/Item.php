@@ -25,11 +25,6 @@ class Item extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function photo()
-    {
-        return $this->hasMany(Photo::class);
-    }
-
     public function colour()
     {
         return $this->belongsToMany(Colour::class, 'item_colours', 'item_id', 'colour_id');
@@ -38,6 +33,11 @@ class Item extends Model
     public function size()
     {
         return $this->belongsToMany(Size::class, 'item_sizes', 'item_id', 'size_id');
+    }
+
+    public function photo()
+    {
+        return $this->belongsToMany(Photo::class, 'item_photos', 'item_id', 'photo_id', 'is_main');
     }
 
 }

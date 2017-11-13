@@ -22,6 +22,7 @@ class CreateItemsTable extends Migration
             $table->integer('fluffiness_id')->unsigned()->index()->nullable();
             $table->foreign('fluffiness_id')->references('id')->on('fluffinesses');
             $table->string('name');
+            $table->text('description');
             $table->timestamps();
         });
     }

@@ -30,21 +30,42 @@ class ItemController extends Controller
 
     public function create()
     {
-        return ResourceController::create(Item::class, 12);
+        $items = ResourceController::create(Item::class, 12);
+        foreach ($items as $item) {
+            $item->category_id = $item->category->name;
+            $item->size_id = $item->size;
+            $item->price_min = $item->size()->min('price');
+            $item->price_max = $item->size()->max('price');
+            $item->photo_id = $item->photo->where('is_main', 1)->pluck('photo')->toArray()[0];
+        }
+        return $items;
     }
 
     public function show($id)
     {
-
         if ($id === 'new-item') {
+            $id = 0;
             return view('admin.pages-profile', [
                 'categories' => Category::all(),
                 'sizes' => Size::all(),
                 'fluffinesses' => Fluffiness::all(),
                 'brands' => Brand::all(),
-                'colours' => Colour::all()
+                'colours' => Colour::all(),
+                'item_id'  => $id
             ]);
-        } else return dd('Access denied');
+        }else{
+            return view('admin.pages-profile', [
+                'categories' => Category::all(),
+                'sizes' => Size::all(),
+                'fluffinesses' => Fluffiness::all(),
+                'brands' => Brand::all(),
+                'colours' => Colour::all(),
+                'item_id'  => $id,
+                'item' => Item::findOrFail($id),
+                'item_size' => DB::table('item_sizes')->where('item_id', $id)->get(),
+            ]);
+        }
+
     }
 
     public function edit($id)
@@ -67,7 +88,7 @@ class ItemController extends Controller
     public function destroy($id)
     {
         ItemController::destroyWithRelative($id);
-        return redirect('/item');
+        return 'Item was deleted';
     }
 
 
@@ -116,7 +137,7 @@ class ItemController extends Controller
         try {
             ItemController::save($request); // Create new record in table Items
             $id = ItemController::getId(); // Get max Id in table Items
-            PhotoController::storeWithRelative(); // Create new records in table Item_photos
+            PhotoController::storeWithRelative($id); // Create new records in table Item_photos
             ColourController::storePivot($id, $request); // Create new records in table Item_colours
             $indexes = ItemController::getKeysWithoutNull($request->prices); // Get indexes of prices, where value is exist
             SizeController::storePivot($id, $request, $indexes); // Create new records in table Item_sizes
@@ -135,9 +156,8 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
         ItemController::updateItem($request, $item);
-        if (PhotoController::checkImage($request)) {
-            PhotoController::storeAll($id, $request);
-        }
+        ResourceController::destroyRelated($item->photo, true);
+        PhotoController::storeWithRelative($id); // Create new records in table Item_photos
         ResourceController::destroyRelated($item->colour, true);
         ColourController::storePivot($id, $request);
         ResourceController::destroyRelated($item->size, true);
@@ -148,7 +168,7 @@ class ItemController extends Controller
     protected static function destroyWithRelative($id)
     {
         $item = Item::findOrFail($id);
-        ResourceController::destroyRelated($item->photo);
+        ResourceController::destroyRelated($item->photo, true);
         ResourceController::destroyRelated($item->colour, true);
         ResourceController::destroyRelated($item->size, true);
         $item->delete();

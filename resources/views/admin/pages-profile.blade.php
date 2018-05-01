@@ -19,6 +19,7 @@
                       enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <center class="m-t-30">
+                        <input type="text" class="non-visible" :value="id" name="id" id="id">
                         <img v-if="isMain" :src="path + mainPhoto" class="img-circle"
                              width="150" v-on:click.prevent="setMainPhoto" style="cursor: pointer" id="main-img"
                              name="main-img"/>
@@ -27,7 +28,7 @@
                              name="main-img"/>
                         <input class="non-visible" type="file" name="mainPhoto" id="mainPhoto"
                                accept=".jpg, .jpeg, .png" v-on:change.prevent="sendMainPhoto">
-                        <h4 class="card-title m-t-10">@{{ item.name }}</h4>
+                        <h4 class="card-title m-t-10">@{{ item.name }} @if(isset($item)) {{$item->name}}  @endif</h4>
                         <h6 class="card-subtitle"></h6>
                     </center>
                 </form>
@@ -36,6 +37,7 @@
             <form action="{{url('/photo')}}" class="form-group" enctype="multipart/form-data" method="post"
                   name="send-photos" id="form-photos-upload">
                 {{ csrf_field() }}
+                <input type="text" class="non-visible" :value="id" name="id" id="id">
                 <label for="select-brand">Загрузите изображения:</label><br>
                 <label class="custom-file">
                     <input type="file" class="custom-file-input" name="photos[]" id="photos"
@@ -59,21 +61,24 @@
         <div class="col-lg-8 col-xlg-9 col-md-7">
             <div class="card">
                 <div class="card-block">
-                    <form action="{{url('/item')}}" method="post" enctype="multipart/form-data"
+                    <form @if(isset($item)) action="{{url('/item/'.$item->id)}}" method="post" @else action="{{url('/item')}}" method="post" @endif enctype="multipart/form-data"
                           class="form-horizontal form-material" id="save-update-form" name="save-update-form">
                         {{ csrf_field() }}
+                        @if(isset($item)) {{ method_field('PUT') }} @endif
                         <div class="form-group">
                             <label class="col-md-12">Название товара</label>
                             <div class="col-md-12">
                                 <input type="text" placeholder="Введите название"
-                                       class="form-control form-control-line" v-model="item.name" name="name" id="name">
+                                       class="form-control form-control-line" name="name" id="name"
+                                       @if(isset($item)) value="{{$item->name}}" @endif>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="colours" class="col-sm-12">Введите описание товара:</label>
                             <div class="col-sm-12">
                                 <textarea rows="3" class="form-control form-control-line" id="description"
-                                          name="description" placeholder="..."></textarea>
+                                          name="description"
+                                          placeholder="...">@if(isset($item)) {{$item->description}}  @endif</textarea>
                             </div>
                         </div>
                         <div class="form-group">
@@ -81,7 +86,8 @@
                             <div class="col-sm-12">
                                 <select class="form-control" id="category" name="category">
                                     @foreach($categories as $categoty)
-                                        <option value="{{$categoty->id}}">{{$categoty->name}}</option>
+                                        <option value="{{$categoty->id}}"
+                                                @if(isset($item)) @if($item->category->id == $categoty->id) selected @endif @endif>{{$categoty->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -91,7 +97,8 @@
                             <div class="col-sm-12">
                                 <select class="form-control" id="brand" name="brand">
                                     @foreach($brands as $brand)
-                                        <option value="{{$brand->id}}">{{$brand->name}}</option>
+                                        <option value="{{$brand->id}}"
+                                                @if(isset($item)) @if($item->brand->id == $brand->id) selected @endif @endif>{{$brand->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -102,7 +109,8 @@
                                 <select class="form-control" id="fluffiness" name="fluffiness">
                                     <option value=""></option>
                                     @foreach($fluffinesses as $fluffiness)
-                                        <option value="{{$fluffiness->id}}">{{$fluffiness->name}}</option>
+                                        <option value="{{$fluffiness->id}}"
+                                                @if(isset($item)) @if($item->fluffiness->id == $fluffiness->id) selected @endif @endif>{{$fluffiness->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -113,11 +121,11 @@
                                 @foreach($colours as $colour)
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" name="colours[]"
-                                               id="colours" value="{{$colour->id}}">
+                                               id="colours" value="{{$colour->id}}"
+                                               @if(isset($item)) @foreach($item->colour as $colour_) @if($colour_->id == $colour->id) checked @endif @endforeach @endif >
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">{{$colour->name}}</span>
                                     </label>
-                                    &nbsp;&nbsp;&nbsp;
                                 @endforeach
                             </div>
                         </div>
@@ -126,19 +134,25 @@
                             <div class="col-sm-12">
                                 <div class="row">
                                     @foreach($sizes as $size)
+                                        <div class="non-visible">
+                                            {{$isExist = false}}
+                                            {{$id = 0}}
+                                            @if(isset($item)) @foreach($item->size as $size_) @if($size_->id == $size->id) {{$isExist = true}} @break @endif {{$id++}} @endforeach @endif
+                                        </div>
+
                                         <div style="border: hidden; padding: 5%" class="col-sm-6">
                                             <label class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" name="sizes[]"
-                                                       id="sizes" value="{{$size->id}}">
+                                                       id="sizes" value="{{$size->id}}" @if($isExist) checked @endif>
                                                 <span class="custom-control-indicator"></span>
                                                 <span class="custom-control-description">{{$size->name}}</span>
                                             </label>
                                             <br>
                                             <input type="text" class="form-control form-control-line" id="price"
-                                                   name="prices[]" placeholder="Введите цену">
+                                                   name="prices[]" placeholder="Введите цену" @if($isExist) value="{{$item_size->where('item_id', $item->id)->where('size_id', $size->id)->pluck('price')->toArray()[0]}}" @endif>
                                             <input type="text" class="form-control form-control-line" id="quantity"
                                                    name="quantity[]"
-                                                   placeholder="Введите количество">
+                                                   placeholder="Введите количество" @if($isExist) value="{{$item_size->where('item_id', $item->id)->where('size_id', $size->id)->pluck('quantity')->toArray()[0]}}" @endif>
                                         </div>
                                     @endforeach
                                 </div>
@@ -146,7 +160,7 @@
                         </div>
                         <div class="form-group">
                             <div class="col-sm-12">
-                                <button class="btn btn-success" type="submit">Update Profile</button>
+                                <button class="btn btn-success" type="submit">Сохранить</button>
                             </div>
                         </div>
                     </form>
@@ -170,7 +184,8 @@
                 photos: {},
                 mainPhoto: '',
                 isMain: false,
-                item: {name: ''}
+                item: {name: ''},
+                id: '<?echo $item_id ?>'
             },
             mounted: function () {
                 this.fetchPhotos();
@@ -178,7 +193,8 @@
 
             methods: {
                 fetchPhotos: function () {
-                    this.$http.get('/photo').then(function (response) {
+                    console.log(this.id);
+                    this.$http.get('/photo/' + this.id).then(function (response) {
                         this.photos = response.body.photos;
                         n = Object.keys(response.body.mainPhoto);
                         n = parseInt(n[0]);
@@ -192,8 +208,14 @@
                     $('#form-photos-upload').submit();
                 },
                 destroyPhoto: function (id) {
-                    this.$http.delete('/photo/' + id).then(function (response) {
-                    });
+                    if(this.id != 0){
+                        this.$http.put('/photo/' + id).then(function (response) {
+                        });
+                    }
+                    else{
+                        this.$http.delete('/photo/' + id).then(function (response) {
+                        });
+                    }
                     this.fetchPhotos();
                 },
                 setMainPhoto: function () {

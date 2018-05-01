@@ -18,19 +18,20 @@
                     <div class="col-sm-3" v-for="item in items">
                         <div class="card">
                             <div class="card-block little-profile text-center">
-                                <div class="pro-img"><img src="http://shop.local/assets/images/users/4.jpg" alt="user">
+                                <div class="pro-img"><img :src="item.photo_id" alt="user">
                                 </div>
                                 <h3 class="m-b-0">@{{ item.name }}</h3>
-                                <p>Юбка &amp; Суперпремиум</p>
-                                <a href="javascript:void(0)"
+                                <p>@{{ item.category_id }}</p>
+                                <a :href="'item/' + item.id"
                                    class="m-t-10 waves-effect waves-dark btn btn-primary btn-sm btn-rounded">Редактировать</a>
+                                <a class="m-t-10 waves-effect waves-dark btn btn-danger btn-sm btn-rounded" v-on:click.prevent="destroyResource(item.id)">Удалить</a>
                                 <div class="row text-center m-t-20">
                                     <div class="col-lg-6 col-md-6 m-t-30">
-                                        <h3 class="m-b-0 font-light">900</h3>
+                                        <i class="m-b-0 font-light">@{{ item.price_min }} - @{{ item.price_max }}</i>
                                         <small>Цена</small>
                                     </div>
                                     <div class="col-lg-6 col-md-6 m-t-30">
-                                        <h3 class="m-b-0 font-light">P, X, S</h3>
+                                        <i class="m-b-0 font-light" v-for="size in item.size">@{{ size.name }} </i>
                                         <small>Размеры</small>
                                     </div>
                                 </div>
@@ -89,7 +90,9 @@
         new Vue({
             el: '#app',
             data: {
-                items: {}
+                items: {},
+                categories: {},
+                response: {skip: 0}
             },
             mounted: function () {
                 this.fetchResources();
@@ -100,7 +103,14 @@
                     this.$http.get('/item/create').then(function (response) {
                         this.items = response.body;
                     })
+                },
+                destroyResource: function (id) {
+                    this.$http.delete('/item/' + id).then(function (response) {
+                        this.fetchResources();
+                        alert(response.body);
+                    })
                 }
+
             }
         });
     </script>
